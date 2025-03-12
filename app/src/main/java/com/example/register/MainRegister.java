@@ -31,6 +31,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainRegister extends AppCompatActivity {
 
+    public static final String URL = new ServerAPI().BASE_URL;
+
     TextView tvBack;
     EditText etNama, etEmail, etPassword;
     Button btn_register;
@@ -91,9 +93,6 @@ public class MainRegister extends AppCompatActivity {
             return;
         }
 
-        ServerAPI urlapi = new ServerAPI();
-        String URL = urlapi.BASE_URL;
-
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -103,34 +102,48 @@ public class MainRegister extends AppCompatActivity {
         api.register(vemail, vname, vpassword).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    JSONObject json = new JSONObject(response.body().string());
-                    if (json.getString("status").equals("1")) {
-                        if (json.getString("result").equals("1")) {
-                            AlertDialog.Builder msg = new AlertDialog.Builder(MainRegister.this);
-                            msg.setMessage("Registrasi Berhasil")
-                                    .setPositiveButton("OK", null)
-                                    .create()
-                                    .show();
-                            etEmail.setText("");
-                            etNama.setText("");
-                            etPassword.setText("");
-                        }else{
-                            AlertDialog.Builder msg = new AlertDialog.Builder(MainRegister.this);
-                            msg.setMessage("Registrasi Gagal")
-                                    .setNegativeButton("retry", null)
-                                    .create()
-                                    .show();
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String jsonResponse = response.body().string();
+                        Log.d("JSON Response", jsonResponse); // Cetak respons JSON untuk debugging
+
+                        JSONObject json = new JSONObject(jsonResponse);
+
+                        // Periksa apakah kunci "status" ada
+                        if (json.has("status")) {
+                            String status = json.getString("status");
+                            if (status.equals("1")) {
+                                if (json.has("result") && json.getString("result").equals("1")) {
+                                    AlertDialog.Builder msg = new AlertDialog.Builder(MainRegister.this);
+                                    msg.setMessage("Registrasi Berhasil")
+                                            .setPositiveButton("OK", null)
+                                            .create()
+                                            .show();
+                                    etEmail.setText("");
+                                    etNama.setText("");
+                                    etPassword.setText("");
+                                } else {
+                                    AlertDialog.Builder msg = new AlertDialog.Builder(MainRegister.this);
+                                    msg.setMessage("Registrasi Gagal")
+                                            .setNegativeButton("Retry", null)
+                                            .create()
+                                            .show();
+                                }
+                            } else {
+                                AlertDialog.Builder msg = new AlertDialog.Builder(MainRegister.this);
+                                msg.setMessage("User sudah ada")
+                                        .setNegativeButton("Retry", null)
+                                        .create()
+                                        .show();
+                            }
+                        } else {
+                            Log.e("JSON Error", "Key 'status' not found in JSON response");
                         }
-                    }else{
-                        AlertDialog.Builder msg = new AlertDialog.Builder(MainRegister.this);
-                        msg.setMessage("User sudah ada")
-                                .setNegativeButton("retry", null)
-                                .create()
-                                .show();
+                    } catch (JSONException | IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (JSONException | IOException e) {
-                    e.printStackTrace();
+                } else {
+                    Log.e("API Error", "Server returned error: " + response.code());
                 }
             }
 

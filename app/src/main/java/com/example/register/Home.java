@@ -1,37 +1,25 @@
 package com.example.register;
 
 import android.annotation.SuppressLint;
-import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
-import com.bumptech.glide.Glide;
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class Home extends AppCompatActivity {
 
-//    ActivityMainBinding binding;
     @SuppressLint("NonConstantResourceId")
-    String username, nama, foto, password, status, email;
+    String nama,email;
     TextView tvwelcome;
-    Button btnkeluar;
+    LinearLayout btnkeluar, btnproduct, btnedit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,25 +33,68 @@ public class Home extends AppCompatActivity {
         });
 
         tvwelcome = findViewById(R.id.tvWelcome);
-        btnkeluar = findViewById(R.id.btnLogout);
-        String username = getIntent().getStringExtra("username").toString();
-//        String email = getIntent().getStringExtra("email").toString();
+        btnkeluar = findViewById(R.id.layoutLogout);
+        btnproduct = findViewById(R.id.layoutProduct);
+        btnedit = findViewById(R.id.layoutEditProfile);
 
-        // Tampilkan username di TextView
-        if (username != null) {
-            tvwelcome.setText("Selamat Datang: " + username);
+        // Ambil data dari intent
+        nama = getIntent().getStringExtra("nama");
+        email = getIntent().getStringExtra("email");
+
+        // Tampilkan nama di TextView
+        if (nama != null) {
+            tvwelcome.setText("Selamat Datang: " + nama + " (" + email + ")");
         } else {
-            tvwelcome.setText("Selamat Datang: Pengguna");
+            tvwelcome.setText("Selamat Datang: Guest");
         }
 
-        btnkeluar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Kembali ke MainActivity
-                Intent intent = new Intent(Home.this, MainActivity.class);
-                startActivity(intent);
-                finish(); // Tutup activity saat ini
-            }
-        });
+        // Atur onClickListener untuk btnkeluar
+        if (btnkeluar != null) {
+            btnkeluar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Kembali ke MainActivity
+                    Intent intent = new Intent(Home.this, MainActivity.class);
+                    startActivity(intent);
+                    finish(); // Tutup activity saat ini
+                }
+            });
+        } else {
+            Log.e("HomeActivity", "btnkeluar is null. Check your layout XML.");
+        }
+
+        // Atur onClickListener untuk btnproduct
+        if (btnproduct != null) {
+            btnproduct.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Buka ProductActivity dan kirim nama pengguna
+                    Intent intent = new Intent(Home.this, ProductActivity.class);
+                    intent.putExtra("nama", nama); // Kirim nama pengguna ke ProductActivity
+                    intent.putExtra("email", email); // Kirim email pengguna ke ProductActivity
+                    startActivity(intent);
+                    finish(); // Tutup activity saat ini
+                }
+            });
+        } else {
+            Log.e("HomeActivity", "btnproduct is null. Check your layout XML.");
+        }
+
+        // Atur onClickListener untuk btnproduct
+        if (btnedit != null) {
+            btnedit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Buka ProductActivity dan kirim nama pengguna
+                    Intent intent = new Intent(Home.this, MainEditProfile.class);
+                    intent.putExtra("nama", nama); // Kirim nama pengguna ke ProductActivity
+                    intent.putExtra("email", email); // Kirim email pengguna ke ProductActivity
+                    startActivity(intent);
+                    finish(); // Tutup activity saat ini
+                }
+            });
+        } else {
+            Log.e("HomeActivity", "btnedit is null. Check your layout XML.");
+        }
     }
 }
